@@ -1,19 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
+/**
+ * Media queries as an external store rather than state-in-an-effect: React
+ * subscribes directly to `matchMedia`, so there is no extra render on mount and
+ * no cascading update during hydration.
+ */
 export function useMediaQuery(query: string, defaultValue = false) {
-  const [matches, setMatches] = useState(defaultValue);
+  const subscribe = useCallback(
+    (onChange: () => void) => {
+      const list = window.matchMedia(query);
+      list.addEventListener("change", onChange);
+      return () => list.removeEventListener("change", onChange);
+    },
+    [query],
+  );
 
-  useEffect(() => {
-    const list = window.matchMedia(query);
-    setMatches(list.matches);
-    const onChange = (event: MediaQueryListEvent) => setMatches(event.matches);
-    list.addEventListener("change", onChange);
-    return () => list.removeEventListener("change", onChange);
-  }, [query]);
+  const getSnapshot = useCallback(() => window.matchMedia(query).matches, [query]);
+  const getServerSnapshot = useCallback(() => defaultValue, [defaultValue]);
 
-  return matches;
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
 /** Below the `md` breakpoint — used to drop WebGL work, not just resize it. */
@@ -21,6 +28,21 @@ export const useIsMobile = () => useMediaQuery("(max-width: 767px)");
 
 /** Coarse pointer → no hover affordances, no magnetic buttons. */
 export const useIsTouch = () => useMediaQuery("(pointer: coarse)");
+
+/** True once the page has scrolled past `threshold` px. */
+export function useScrolledPast(threshold = 40) {
+  const subscribe = useCallback((onChange: () => void) => {
+    window.addEventListener("scroll", onChange, { passive: true });
+    return () => window.removeEventListener("scroll", onChange);
+  }, []);
+
+  const getSnapshot = useCallback(
+    () => window.scrollY > threshold,
+    [threshold],
+  );
+
+  return useSyncExternalStore(subscribe, getSnapshot, () => false);
+}
 
 export type Capability = "unknown" | "full" | "reduced" | "none";
 
@@ -37,7 +59,8 @@ export function useGraphicsCapability(): Capability {
   useEffect(() => {
     let cancelled = false;
 
-    // Deferred so the probe never competes with first paint.
+    // Deferred so the probe never competes with first paint, and so the state
+    // update happens in a callback rather than synchronously in the effect.
     const id = window.setTimeout(() => {
       if (cancelled) return;
 
@@ -73,30 +96,4 @@ export function useGraphicsCapability(): Capability {
   }, []);
 
   return capability;
-}
-
-/** True after the element has entered the viewport at least once. */
-export function useInViewOnce<T extends HTMLElement>(
-  ref: React.RefObject<T | null>,
-  rootMargin = "200px",
-) {
-  const [seen, setSeen] = useState(false);
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node || seen) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setSeen(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [ref, rootMargin, seen]);
-
-  return seen;
 }

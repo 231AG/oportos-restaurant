@@ -71,7 +71,6 @@ export function DishStage({
   const requested = useRef<ModelKey>(model);
   const presence = useRef(reduced ? 1 : 0);
   const lookAt = useRef(new THREE.Vector3(...pose.from.target));
-  const idleSeed = useRef(Math.random() * 10);
 
   useEffect(() => {
     requested.current = model;
@@ -82,15 +81,17 @@ export function DishStage({
     if (!group) return;
 
     const delta = Math.min(rawDelta, 1 / 30);
-    const time = state.clock.elapsedTime + idleSeed.current;
+    const time = state.clock.elapsedTime;
     const progress = smoothstep(
       Math.min(1, Math.max(0, reduced ? 0 : (progressRef?.current ?? 0))),
     );
 
     // — Swap transition —
+    // Damped hard (≈180ms each way): a softer swap left the previous dish on
+    // screen long enough to be read against the incoming dish's copy.
     const presenceTarget = requested.current === rendered ? 1 : 0;
-    presence.current = damp(presence.current, presenceTarget, 7, delta);
-    if (presenceTarget === 0 && presence.current < 0.05) {
+    presence.current = damp(presence.current, presenceTarget, 14, delta);
+    if (presenceTarget === 0 && presence.current < 0.06) {
       setRendered(requested.current);
     }
     const appear = presence.current;

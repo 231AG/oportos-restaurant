@@ -1,9 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import * as THREE from "three";
 import { displace, seeded } from "../utils/geometry";
 import { createFoodMaterial, createSimpleMaterial } from "../utils/materials";
-import { useAssets } from "../utils/useAssets";
+import { useDispose } from "../utils/useAssets";
 import { Plate } from "./Plate";
 import type { DishModelProps } from "../types";
 
@@ -15,7 +16,7 @@ import type { DishModelProps } from "../types";
 export function Ribs({ palette, quality }: DishModelProps) {
   const full = quality === "full";
 
-  const assets = useAssets(() => {
+  const assets = useMemo(() => {
     const rand = seeded(2211);
 
     const slab = displace(
@@ -80,6 +81,8 @@ export function Ribs({ palette, quality }: DishModelProps) {
       ribs,
     };
   }, [palette.base, palette.deep, palette.glow, full]);
+
+  useDispose(assets);
 
   const castShadow = full;
 

@@ -17,7 +17,7 @@ import path from "node:path";
 
 const BASE = process.argv[2]?.startsWith("http")
   ? process.argv[2]
-  : "http://127.0.0.1:3000";
+  : (process.env.BASE_URL ?? "http://127.0.0.1:3100");
 const onlyArg = process.argv.find((arg) => arg.startsWith("--only="));
 const only = onlyArg ? onlyArg.split("=")[1].split(",") : null;
 

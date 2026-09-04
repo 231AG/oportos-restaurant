@@ -24,7 +24,7 @@ export function Plate({
     const segments = quality === "full" ? 96 : 48;
     return {
       geometry: plateGeometry(radius, segments),
-      material: createCeramicMaterial("#0f0c0a"),
+      material: createCeramicMaterial("#0c0a08"),
       jusGeometry: new THREE.CircleGeometry(jusRadius, segments),
       jusMaterial: new THREE.MeshPhysicalMaterial({
         color: jus ?? "#3a0f06",

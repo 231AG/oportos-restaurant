@@ -7,11 +7,20 @@ import {
   useEffect,
   useMemo,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import type { CartLine } from "@/lib/cart-types";
-
-const STORAGE_KEY = "oportos.tray.v1";
+import {
+  addLine,
+  clearLines,
+  decrementLine,
+  getServerSnapshot,
+  getSnapshot,
+  incrementLine,
+  removeLine,
+  subscribe,
+} from "@/lib/tray-store";
 
 interface CartContextValue {
   lines: CartLine[];
@@ -36,29 +45,9 @@ const CartContext = createContext<CartContextValue | null>(null);
  * thing to WhatsApp as text.
  */
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [lines, setLines] = useState<CartLine[]>([]);
+  const lines = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const [open, setOpen] = useState(false);
   const [lastAdded, setLastAdded] = useState<string | null>(null);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored) setLines(JSON.parse(stored) as CartLine[]);
-    } catch {
-      // Private mode / blocked storage: the tray just doesn't persist.
-    }
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
-    } catch {
-      /* ignore */
-    }
-  }, [lines, hydrated]);
 
   useEffect(() => {
     if (!lastAdded) return;
@@ -68,45 +57,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const add = useCallback(
     (line: Omit<CartLine, "quantity">, quantity = 1) => {
-      setLines((current) => {
-        const existing = current.find((entry) => entry.id === line.id);
-        if (existing) {
-          return current.map((entry) =>
-            entry.id === line.id
-              ? { ...entry, quantity: entry.quantity + quantity }
-              : entry,
-          );
-        }
-        return [...current, { ...line, quantity }];
-      });
+      addLine(line, quantity);
       setLastAdded(line.id);
     },
     [],
   );
-
-  const increment = useCallback((id: string) => {
-    setLines((current) =>
-      current.map((entry) =>
-        entry.id === id ? { ...entry, quantity: entry.quantity + 1 } : entry,
-      ),
-    );
-  }, []);
-
-  const decrement = useCallback((id: string) => {
-    setLines((current) =>
-      current.flatMap((entry) => {
-        if (entry.id !== id) return [entry];
-        if (entry.quantity <= 1) return [];
-        return [{ ...entry, quantity: entry.quantity - 1 }];
-      }),
-    );
-  }, []);
-
-  const remove = useCallback((id: string) => {
-    setLines((current) => current.filter((entry) => entry.id !== id));
-  }, []);
-
-  const clear = useCallback(() => setLines([]), []);
 
   const value = useMemo<CartContextValue>(() => {
     const count = lines.reduce((sum, line) => sum + line.quantity, 0);
@@ -120,14 +75,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
       total,
       open,
       add,
-      increment,
-      decrement,
-      remove,
-      clear,
+      increment: incrementLine,
+      decrement: decrementLine,
+      remove: removeLine,
+      clear: clearLines,
       setOpen,
       lastAdded,
     };
-  }, [lines, open, add, increment, decrement, remove, clear, lastAdded]);
+  }, [lines, open, add, lastAdded]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

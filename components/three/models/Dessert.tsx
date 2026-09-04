@@ -1,9 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import * as THREE from "three";
 import { displace } from "../utils/geometry";
 import { createFoodMaterial, createSimpleMaterial } from "../utils/materials";
-import { useAssets } from "../utils/useAssets";
+import { useDispose } from "../utils/useAssets";
 import { Plate } from "./Plate";
 import type { DishModelProps } from "../types";
 
@@ -17,7 +18,7 @@ import type { DishModelProps } from "../types";
 export function Dessert({ palette, quality }: DishModelProps) {
   const full = quality === "full";
 
-  const assets = useAssets(() => {
+  const assets = useMemo(() => {
     const segments = full ? 64 : 28;
     const gap = 0.72;
 
@@ -86,7 +87,9 @@ export function Dessert({ palette, quality }: DishModelProps) {
       }),
       creamMaterial: createSimpleMaterial("#f7f1e6", 0.85, 0.05),
     };
-  }, [palette.base, palette.deep, palette.glow, full]);
+  }, [palette.glow, full]);
+
+  useDispose(assets);
 
   const castShadow = full;
 

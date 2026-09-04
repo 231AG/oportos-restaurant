@@ -8,6 +8,7 @@ import { site } from "@/config/site";
 import { generalOrderMessage } from "@/lib/whatsapp";
 import { OrderButton } from "@/components/ui/OrderButton";
 import { useCart } from "@/components/menu/CartProvider";
+import { useScrolledPast } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 
 /**
@@ -19,19 +20,17 @@ export function Nav() {
   const pathname = usePathname();
   const reduced = useReducedMotion();
   const { count, setOpen } = useCart();
-  const [scrolled, setScrolled] = useState(false);
+  const scrolled = useScrolledPast(40);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
+  // Close the overlay when the route changes. Adjusting state during render on
+  // a changed input is the sanctioned pattern here — an effect for this fires a
+  // second render pass after the new page has already painted with the menu up.
+  const [lastPath, setLastPath] = useState(pathname);
+  if (lastPath !== pathname) {
+    setLastPath(pathname);
     setMenuOpen(false);
-  }, [pathname]);
+  }
 
   useEffect(() => {
     if (!menuOpen) return;

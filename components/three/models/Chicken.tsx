@@ -1,12 +1,13 @@
 "use client";
 
+import { useMemo } from "react";
 import * as THREE from "three";
 import { displace, seeded } from "../utils/geometry";
 import {
   createFoodMaterial,
   createSimpleMaterial,
 } from "../utils/materials";
-import { useAssets } from "../utils/useAssets";
+import { useDispose } from "../utils/useAssets";
 import { Plate } from "./Plate";
 import type { DishModelProps } from "../types";
 
@@ -21,7 +22,7 @@ import type { DishModelProps } from "../types";
 export function Chicken({ palette, quality }: DishModelProps) {
   const full = quality === "full";
 
-  const assets = useAssets(() => {
+  const assets = useMemo(() => {
     const rand = seeded(9021);
 
     const body = displace(
@@ -114,11 +115,16 @@ export function Chicken({ palette, quality }: DishModelProps) {
     };
   }, [palette.base, palette.deep, palette.glow, full]);
 
+  useDispose(assets);
+
   const castShadow = full;
 
   return (
     <group>
-      <Plate quality={quality} jus={palette.deep} jusRadius={1.15} />
+      {/* No jus disc here: at this camera height its specular caught the key
+          light as a bright arc across the front of the plate that read as a
+          light leak rather than as sauce. */}
+      <Plate quality={quality} />
 
       {/* Two breast lobes with a seam between them — a butterflied bird is not
           one mass, and modelling it as a single sphere is what made the first
@@ -128,9 +134,9 @@ export function Chicken({ palette, quality }: DishModelProps) {
           key={`lobe-${side}`}
           geometry={assets.body}
           material={assets.skin}
-          position={[side * 0.38, 0.34, side * 0.03]}
-          rotation={[0.04, side * 0.16, side * -0.14]}
-          scale={[0.96, 0.52, 1.04]}
+          position={[side * 0.44, 0.33, side * 0.03]}
+          rotation={[0.04, side * 0.16, side * -0.2]}
+          scale={[0.9, 0.5, 1.04]}
           castShadow={castShadow}
         />
       ))}
@@ -150,16 +156,17 @@ export function Chicken({ palette, quality }: DishModelProps) {
           <mesh
             geometry={assets.leg}
             material={assets.legSkin}
-            position={[side * 0.5, 0.26, 0.56]}
-            rotation={[1.15, 0, side * 0.55]}
-            scale={[1.0, 1.05, 1.0]}
+            position={[side * 0.48, 0.24, 0.62]}
+            rotation={[1.2, 0, side * 0.5]}
+            scale={[1.25, 1.2, 1.25]}
             castShadow={castShadow}
           />
           <mesh
             geometry={assets.bone}
             material={assets.boneMaterial}
-            position={[side * 0.68, 0.13, 0.86]}
-            rotation={[1.15, 0, side * 0.55]}
+            position={[side * 0.7, 0.11, 0.96]}
+            rotation={[1.2, 0, side * 0.5]}
+            scale={1.2}
             castShadow={castShadow}
           />
         </group>

@@ -40,7 +40,3 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local verification helpers
-scripts/_quick.mjs
-scripts/_cycle.sh
-screenshots/_*.png

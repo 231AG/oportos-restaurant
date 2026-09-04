@@ -1,24 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, type DependencyList } from "react";
+import { useEffect } from "react";
 
 interface Disposable {
   dispose?: () => void;
 }
 
 /**
- * Builds geometries/materials once per dependency change and disposes them on
- * unmount. R3F only auto-disposes objects it created itself, so anything built
- * in a `useMemo` and passed in as a prop has to be cleaned up by hand — that is
- * the difference between switching dishes 20 times and leaking 20 scenes.
+ * Disposes every geometry/material in an asset bundle when it is replaced or
+ * unmounted. R3F only auto-disposes objects it created itself, so anything
+ * built in a `useMemo` and passed in as a prop has to be cleaned up by hand —
+ * that is the difference between switching dishes 20 times and leaking 20
+ * scenes' worth of GPU buffers.
  */
-export function useAssets<T extends Record<string, unknown>>(
-  factory: () => T,
-  deps: DependencyList,
-): T {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const assets = useMemo(factory, deps);
-
+export function useDispose(assets: Record<string, unknown>) {
   useEffect(
     () => () => {
       Object.values(assets).forEach((value) => {
@@ -31,6 +26,4 @@ export function useAssets<T extends Record<string, unknown>>(
     },
     [assets],
   );
-
-  return assets;
 }

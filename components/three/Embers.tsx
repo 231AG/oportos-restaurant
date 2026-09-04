@@ -61,10 +61,14 @@ export function Embers({
     [color, height],
   );
 
+  // Written through the material ref rather than the memoised `uniforms` object:
+  // the uniform values belong to three.js once the material is created, and
+  // mutating a render-created object from the frame loop is not allowed.
   useFrame((state, delta) => {
-    if (!animate || !materialRef.current) return;
-    uniforms.uTime.value += delta;
-    uniforms.uPixelRatio.value = state.viewport.dpr;
+    const material = materialRef.current;
+    if (!animate || !material) return;
+    material.uniforms.uTime.value += delta;
+    material.uniforms.uPixelRatio.value = state.viewport.dpr;
   });
 
   return (

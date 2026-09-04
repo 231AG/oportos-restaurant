@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { bowlGeometry, displace, seeded } from "../utils/geometry";
 import {
@@ -8,7 +8,7 @@ import {
   createFoodMaterial,
   createSimpleMaterial,
 } from "../utils/materials";
-import { useAssets } from "../utils/useAssets";
+import { useDispose } from "../utils/useAssets";
 import type { DishModelProps } from "../types";
 
 /**
@@ -21,7 +21,7 @@ export function Bowl({ palette, quality }: DishModelProps) {
   const grainsRef = useRef<THREE.InstancedMesh>(null);
   const grainCount = full ? 180 : 70;
 
-  const assets = useAssets(() => {
+  const assets = useMemo(() => {
     const cabbage = displace(
       new THREE.BoxGeometry(0.78, 0.42, 0.5, 10, 6, 8),
       0.06,
@@ -86,6 +86,8 @@ export function Bowl({ palette, quality }: DishModelProps) {
       })(),
     };
   }, [palette.base, palette.deep, palette.glow, full, grainCount]);
+
+  useDispose(assets);
 
   useLayoutEffect(() => {
     const mesh = grainsRef.current;

@@ -1,10 +1,10 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { displace, seeded } from "../utils/geometry";
 import { createFoodMaterial, createSimpleMaterial } from "../utils/materials";
-import { useAssets } from "../utils/useAssets";
+import { useDispose } from "../utils/useAssets";
 import { Plate } from "./Plate";
 import type { DishModelProps } from "../types";
 
@@ -18,7 +18,7 @@ export function Burger({ palette, quality }: DishModelProps) {
   const seedsRef = useRef<THREE.InstancedMesh>(null);
   const seedCount = full ? 42 : 18;
 
-  const assets = useAssets(() => {
+  const assets = useMemo(() => {
     const bunTop = displace(
       new THREE.SphereGeometry(
         0.92,
@@ -112,7 +112,9 @@ export function Burger({ palette, quality }: DishModelProps) {
         });
       })(),
     };
-  }, [palette.base, palette.deep, palette.glow, full, seedCount]);
+  }, [palette.deep, palette.glow, full, seedCount]);
+
+  useDispose(assets);
 
   useLayoutEffect(() => {
     const mesh = seedsRef.current;

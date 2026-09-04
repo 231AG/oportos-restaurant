@@ -11,6 +11,10 @@ import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useIsTouch } from "@/lib/hooks";
 
+/** Created once at module scope — `motion.create` during render makes a new
+    component type on every pass, which remounts the link and kills its state. */
+const MotionLink = motion.create(Link);
+
 type Variant = "primary" | "outline" | "ghost";
 type Size = "md" | "lg";
 
@@ -135,7 +139,6 @@ export function ButtonLink({
   external?: boolean;
 } & Omit<ComponentProps<"a">, "href">) {
   const { ref, offset, handlers, enabled } = useMagnetic();
-  const MotionLink = motion.create(Link);
 
   const shared = {
     ref: ref as React.Ref<HTMLAnchorElement>,

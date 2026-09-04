@@ -30,7 +30,11 @@ export function Preloader() {
     }
     if (seen) return;
 
-    setVisible(true);
+    // Deferred by a frame: whether to show the intro is a client-only decision
+    // (it depends on sessionStorage), so the server HTML and the first client
+    // render have to agree that it isn't there yet.
+    const frame = requestAnimationFrame(() => setVisible(true));
+
     const timer = window.setTimeout(() => {
       setVisible(false);
       try {
@@ -40,7 +44,10 @@ export function Preloader() {
       }
     }, MAX_DURATION);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
   }, [reduced]);
 
   return (

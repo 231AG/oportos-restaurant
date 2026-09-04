@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OPORTOS
 
-## Getting Started
+A cinematic, 3D restaurant site for a fictional flame-grilled kitchen in Shoreditch,
+London. Built as a portfolio piece: original art direction, a procedural WebGL hero,
+scroll-driven storytelling, and ordering that ends in a WhatsApp message rather than a
+checkout.
 
-First, run the development server:
+![Hero](screenshots/01-hero.png)
+
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Production build and the visual-verification workflow:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+npm start            # http://localhost:3000
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+npm run preview      # build + serve on :3100 (used by the scripts below)
+npm run shoot        # drive the site in Chromium, write PNGs to /screenshots
+npm run check:flows  # tray, dish detail, keyboard order, mobile menu
+npm run check:links  # every wa.me link: number, encoding, target, rel
+npm run audit:a11y   # axe-core, WCAG 2.1 A/AA, all five routes
+npm run measure      # initial vs. lazily-loaded JS payload
+npm run lint
+npm run typecheck
+```
 
-## Learn More
+## What's here
 
-To learn more about Next.js, take a look at the following resources:
+| Area | Notes |
+| --- | --- |
+| Hero | Procedural 3D dish, scroll-driven camera, pointer parallax, masked line reveals |
+| Our Flavour | Editorial statement, scroll-depth ingredient composition, velocity-reactive marquee |
+| Signature dishes | Sticky scroll sequence over 5 dishes; the 3D scene swaps models, the wash and copy follow |
+| Immersive | Four-layer parallax heat bloom, no product, one line of copy |
+| Menu | Five categories, editorial rows, per-dish WhatsApp order + add-to-tray, sticky scroll-spy |
+| Story / Location | Chapters, quote, drawn map schematic (no third-party embed) |
+| Ordering | `wa.me` deep links only — no backend, no accounts, no payment |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Next.js 16 (App Router) · TypeScript · Tailwind v4 · React Three Fiber + drei + three ·
+Framer Motion · GSAP (ScrollTrigger) · Lenis.
 
-## Deploy on Vercel
+## Assets
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+There are **no image or model files in this repository.** Outbound network access in the
+environment this was built in is restricted to the npm registry, so no photography or GLB
+could be sourced. Every visual is generated:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **3D:** displaced primitive geometry with a custom fbm char/sear shader patched into
+  `MeshPhysicalMaterial` (`components/three/utils/`). Five dishes, ~0 KB of binary assets.
+- **Fallback:** a duotone SVG "print" of each dish (`components/three/fallback/DishArt.tsx`)
+  for devices without WebGL, or where the capability probe says the GPU shouldn't be asked.
+- **Texture/grain:** inline SVG `feTurbulence`, no image requests.
+- **Fonts:** self-hosted via `@fontsource`, so the build never needs network access.
+
+## Structure
+
+```
+app/            routes: /, /menu, /story, /contact, not-found
+components/
+  three/        canvas host, camera rig, lighting, models/, fallback/, utils/
+  motion/       reveals, parallax, smooth scroll
+  menu/         tray provider + drawer, menu rows, dish detail
+  navigation/   nav, mobile overlay, footer
+  sections/     homepage sections
+  ui/           buttons, marquee, headers, heat scale
+config/site.ts  brand, address, hours — and the single WhatsApp number
+data/menu.ts    dishes, categories, palettes
+lib/            whatsapp message builders, frame store, hooks, tray store
+scripts/        verification tooling (see above)
+```
+
+## Accessibility
+
+Semantic landmarks, a skip link, visible focus rings, labelled controls, Escape-dismissable
+dialogs with focus restore, and a real reduced-motion path (the 3D scene freezes its idle
+motion, camera rig and pointer response rather than merely animating faster).
+
+`npm run audit:a11y` reports one remaining contrast finding per page: the oversized
+`OPORTOS` watermark in the footer, which is `aria-hidden` decoration duplicating the
+full-contrast wordmark in the nav — WCAG 1.4.3 exempts pure decoration.

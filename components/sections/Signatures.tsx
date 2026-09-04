@@ -85,7 +85,7 @@ export function Signatures() {
             initial={reduced ? { opacity: 0 } : { opacity: 0, y: 60 }}
             animate={{ opacity: 1, y: 0 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, y: -60 }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
           >
             {dish.index}
           </motion.span>
@@ -156,7 +156,7 @@ export function Signatures() {
           {/* Dish index — clickable, and a progress rail on desktop. */}
           <nav
             aria-label="Signature dishes"
-            className="relative order-3 mt-4 flex gap-x-6 gap-y-2 overflow-x-auto border-t border-line pt-4 md:mt-0"
+            className="mask-fade-x relative order-3 mt-4 flex gap-x-6 gap-y-2 overflow-x-auto border-t border-line pt-4 md:mt-0"
           >
             {signatureDishes.map((entry, index) => (
               <button

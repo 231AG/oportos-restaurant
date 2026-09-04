@@ -29,7 +29,9 @@
   /* — Paper / text — */
   --color-cream: #f4ece0;
   --color-cream-dim: #b8ada0;
-  --color-ash: #7d7167;
+  /* Lightened from #7d7167, which measured 4.21:1 on the page background —
+     under the 4.5:1 floor for the 11px labels it is used on. */
+  --color-ash: #8f8277;
 
   /* — Semantic aliases (use these in components) — */
   --color-background: var(--color-ink);
@@ -223,15 +225,6 @@
   60%,
   100% {
     transform: translateY(320%);
-  }
-}
-
-@keyframes marquee {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(-50%, 0, 0);
   }
 }
 

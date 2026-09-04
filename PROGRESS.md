@@ -5,12 +5,11 @@ resume from a cold start (see spec §0.2).
 
 ## Current status
 
-**Step:** 1–8 done (hero, 3D, scroll storytelling, dishes, menu, WhatsApp, responsive)
-→ 9 (performance) and 10 (test + design review) remaining.
+**Step:** all 10 complete. The site builds, lints, typechecks and passes its flow,
+link and accessibility checks.
 
-**Next action:** Performance pass — audit bundle output, confirm the 3D is code-split and
-paused off-screen, check the reduced-quality path on mobile. Then the full design review
-against `/screenshots` and the §20 completion checklist.
+**Next action:** none outstanding — see "Known trade-offs" for the things deliberately
+left as they are.
 
 ## Environment findings (step 1)
 
@@ -62,8 +61,67 @@ Decision: **every visual in the site is generated in-repo.**
 - [x] 6. Signature dishes, dish detail panel, full menu with category scroll-spy.
 - [x] 7. WhatsApp ordering — single number in config, per-dish/tray/booking messages.
 - [x] 8. Responsive — separate compact camera pose, mobile layout, touch behaviour.
-- [ ] 9. Performance.
-- [ ] 10. Test, design review, polish.
+- [x] 9. Performance — code-splitting verified, GSAP deferred, frameloop gating, DPR caps.
+- [x] 10. Test, design review, polish — screenshots, axe audit, flow/link checks.
+
+## Step 9 — performance decisions (measured, not assumed)
+
+`npm run measure` drives a real browser against a production build and splits JS by
+whether it arrived before or after first paint:
+
+- **Initial JS: ~688 KB raw (~200 KB gzipped)** across 12 files — framework, React,
+  Framer Motion, app code.
+- **Lazy: ~1.1 MB raw**, of which the three.js + drei chunk is **979 KB raw / 263 KB
+  gzipped**. It is `dynamic(..., { ssr: false })`, so a device that lands on the SVG
+  fallback never downloads it at all.
+- GSAP + ScrollTrigger (~110 KB) were in the entry chunk once the marquee started using
+  them; they are now imported inside the effect, so they load after first paint. The
+  marquee markup still renders server-side — only the motion is deferred.
+- The canvas sets `frameloop="never"` whenever it is off-screen or the tab is hidden, so
+  a scrolled-past hero costs nothing.
+- DPR is capped at 1.9 (full) / 1.4 (reduced) with drei's `AdaptiveDpr` on top.
+- The `reduced` quality tier halves geometry segments, drops shadows, the IBL
+  environment and the ember particles, and shortens the shader's fbm loop from 4
+  octaves to 2.
+- Geometries and materials are disposed on unmount (`useDispose`) — R3F only
+  auto-disposes what it created itself, and the showcase swaps models repeatedly.
+
+## Step 10 — verification
+
+| Check | Result |
+| --- | --- |
+| `npm run lint` | clean (9 React-compiler-rule errors found and fixed, see below) |
+| `npm run typecheck` | clean |
+| `npm run build` | clean, 5 static routes |
+| `npm run check:flows` | 12/12 pass |
+| `npm run check:links` | 46 `wa.me` links across 5 routes, all well-formed |
+| `npm run audit:a11y` | 1 finding/page, the decorative footer watermark (documented) |
+| `npm run shoot` | 25 captures incl. mobile, reduced-motion and no-WebGL |
+
+The React 19 compiler-aware lint rules caught nine real problems: `setState` in effect
+bodies (media queries, tray hydration, nav scroll, preloader), `Math.random()` during
+render, mutating a memoised uniforms object from the frame loop, `motion.create()` during
+render, and a non-literal `useMemo` dependency list. Fixing them properly meant moving
+media queries, scroll position and the tray to `useSyncExternalStore`.
+
+Design review of the captured screenshots produced these fixes: the food shader's flat
+diffuse (now varied by fbm + speckle), a glossy plate reading as a wooden board (now
+matte ceramic), a single-sphere chicken body reading as a loaf (now two lobes with a
+seam and larger drumsticks), sesame seeds floating above the bun (placement now follows
+the scaled dome), a too-blurry SVG fallback (blur radii are viewBox units), the
+cheesecake's un-burnt top, a hero that cropped off both sides of a phone (separate
+compact camera pose), and a dish swap slow enough to show the previous model against the
+new dish's copy.
+
+## Known trade-offs
+
+- **Dish detail uses the SVG art, not a second canvas.** The showcase canvas stays mounted
+  behind the overlay; two live WebGL scenes on one screen is a frame-rate cliff.
+- **The footer watermark fails automated contrast checks by design** — decorative,
+  `aria-hidden`, and duplicated at full contrast in the nav.
+- **Procedural food has a ceiling.** These models read as stylised CG, not photography.
+  With a sourceable GLB the same rig would carry a scanned dish unchanged — the camera,
+  swap and quality tiers are model-agnostic.
 
 ## Notes from the 3D/visual iteration (steps 3–6)
 
