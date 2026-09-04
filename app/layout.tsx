@@ -34,7 +34,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en-GB" className="h-full">
+    // `data-scroll-behavior="smooth"` restores Next's pre-16 handling: because
+    // this site sets `scroll-behavior: smooth` on <html> for in-page anchors,
+    // without it every route change would smooth-scroll to the top instead of
+    // landing there instantly. See next/dist/docs .../upgrading/version-16.md.
+    <html lang="en-GB" className="h-full" data-scroll-behavior="smooth">
       <body className="flex min-h-full flex-col bg-ink text-cream antialiased">
         <CartProvider>
           <SmoothScroll />
