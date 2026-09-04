@@ -58,12 +58,15 @@ export function DishArt({ model, palette, className, label }: DishArtProps) {
             <stop offset="100%" stopColor={palette.deep} />
           </linearGradient>
 
+          {/* Blur radii are in viewBox units, so they scale with the rendered
+              size — 6 units looked fine in the editor and turned the dish into
+              a smudge at hero scale. */}
           <filter id={`${uid}-soft`}>
-            <feGaussianBlur stdDeviation="6" />
+            <feGaussianBlur stdDeviation="1.6" />
           </filter>
 
           <filter id={`${uid}-bigsoft`}>
-            <feGaussianBlur stdDeviation="42" />
+            <feGaussianBlur stdDeviation="34" />
           </filter>
 
           <filter id={`${uid}-grain`}>
@@ -144,6 +147,19 @@ export function DishArt({ model, palette, className, label }: DishArtProps) {
           )}
         </g>
 
+        {/* Char marks — the same language as the shader's grill stripes. */}
+        <g
+          stroke={palette.deep}
+          strokeOpacity="0.55"
+          strokeWidth="7"
+          strokeLinecap="round"
+          fill="none"
+        >
+          {MARKS[model].map((d, index) => (
+            <path key={index} d={d} />
+          ))}
+        </g>
+
         {/* Rim light along the top-left of the composition */}
         <path
           d="M250 430 A 280 265 0 0 1 720 400"
@@ -166,6 +182,34 @@ export function DishArt({ model, palette, className, label }: DishArtProps) {
     </motion.div>
   );
 }
+
+/** Sear marks laid over each silhouette so the art reads as grilled, not painted. */
+const MARKS: Record<ModelKey, string[]> = {
+  chicken: [
+    "M368 448 C 420 528, 470 574, 540 606",
+    "M452 414 C 496 500, 552 556, 626 588",
+    "M542 404 C 578 490, 630 546, 700 574",
+  ],
+  burger: [
+    "M330 634 C 400 656, 600 656, 670 634",
+    "M336 560 C 410 582, 590 582, 664 560",
+    "M348 446 C 416 468, 584 468, 652 446",
+  ],
+  ribs: [
+    "M320 414 H 690",
+    "M316 486 H 694",
+    "M320 558 H 690",
+    "M330 630 H 680",
+  ],
+  bowl: [
+    "M352 452 C 420 500, 470 520, 520 508",
+    "M560 600 C 610 570, 646 560, 676 566",
+  ],
+  dessert: [
+    "M300 452 C 380 418, 470 412, 560 436",
+    "M296 512 C 384 484, 480 480, 566 502",
+  ],
+};
 
 type Shape =
   | {

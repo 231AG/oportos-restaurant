@@ -80,15 +80,17 @@ export function Burger({ palette, quality }: DishModelProps) {
       cheese: new THREE.BoxGeometry(1.52, 0.05, 1.52),
       cheeseDrip: new THREE.BoxGeometry(0.34, 0.16, 0.06),
       seed: new THREE.SphereGeometry(0.028, 6, 5),
+      // The bun is the only warm-neutral in the stack — keeping it on the dish
+      // accent turned the whole burger into one orange mass.
       bun: createFoodMaterial({
-        base: palette.base,
-        deep: "#3a1a08",
-        glow: "#ffce8f",
+        base: "#b8823f",
+        deep: "#4a2a10",
+        glow: "#ffd9a3",
         noiseScale: 5.5,
-        char: 0.3,
-        glaze: 0.22,
-        roughness: 0.72,
-        clearcoat: 0.1,
+        char: 0.34,
+        glaze: 0.18,
+        roughness: 0.78,
+        clearcoat: 0.06,
         cheap: !full,
       }).material,
       pattyTop: meat(11, "x"),
@@ -117,8 +119,11 @@ export function Burger({ palette, quality }: DishModelProps) {
     if (!mesh) return;
     const dummy = new THREE.Object3D();
     assets.seedPlacements.forEach((position, index) => {
+      // Seeds sit on the top bun's actual surface: the dome is scaled to 0.78
+      // on Y and centred at 1.06, so the placement has to follow it or the
+      // seeds float in a ring above the burger.
       dummy.position.copy(position);
-      dummy.position.y = position.y * 0.72 + 1.18;
+      dummy.position.y = position.y * 0.78 + 1.06;
       dummy.scale.setScalar(0.85 + (index % 5) * 0.08);
       dummy.updateMatrix();
       mesh.setMatrixAt(index, dummy.matrix);

@@ -28,6 +28,26 @@ const HERO_POSE: StagePose = {
   },
 };
 
+/**
+ * Narrow viewports need their own framing: the camera FOV is vertical, so a
+ * pose tuned for 16:9 crops the plate off both sides of a phone. Pulling back
+ * and shrinking the subject keeps the whole dish in frame.
+ */
+const HERO_POSE_COMPACT: StagePose = {
+  from: {
+    camera: [0, 1.35, 4.75],
+    target: [0, 0.42, 0],
+    scale: 1.1,
+    rotationY: -0.35,
+  },
+  to: {
+    camera: [0.2, 4.6, 3.4],
+    target: [0, 0.24, 0],
+    scale: 0.86,
+    rotationY: 0.7,
+  },
+};
+
 function ReadySignal({ onReady }: { onReady?: () => void }) {
   const gl = useThree((state) => state.gl);
   useEffect(() => {
@@ -43,6 +63,7 @@ interface HeroSceneProps {
   palette: Palette;
   quality: Quality;
   reduced: boolean;
+  compact?: boolean;
   onReady?: () => void;
 }
 
@@ -51,15 +72,17 @@ export default function HeroScene({
   palette,
   quality,
   reduced,
+  compact = false,
   onReady,
 }: HeroSceneProps) {
   const full = quality === "full";
+  const pose = compact ? HERO_POSE_COMPACT : HERO_POSE;
 
   return (
     <SceneCanvas
       quality={quality}
-      cameraPosition={HERO_POSE.from.camera}
-      fov={38}
+      cameraPosition={pose.from.camera}
+      fov={compact ? 42 : 38}
     >
       <ReadySignal onReady={onReady} />
       <Lighting quality={quality} rim={palette.glow} />
@@ -69,7 +92,7 @@ export default function HeroScene({
         quality={quality}
         reduced={reduced}
         progressRef={progressRef}
-        pose={HERO_POSE}
+        pose={pose}
         spin={0.075}
         pointerStrength={full ? 1 : 0.45}
         shadows

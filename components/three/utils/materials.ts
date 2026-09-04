@@ -197,11 +197,11 @@ export function createCeramicMaterial(tint = "#171310") {
   // out into two white hotspots and reads as plastic.
   return new THREE.MeshPhysicalMaterial({
     color: tint,
-    roughness: 0.62,
+    roughness: 0.88,
     metalness: 0,
-    clearcoat: 0.22,
-    clearcoatRoughness: 0.6,
-    envMapIntensity: 0.55,
+    clearcoat: 0.06,
+    clearcoatRoughness: 0.8,
+    envMapIntensity: 0.22,
   });
 }
 

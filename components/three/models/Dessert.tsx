@@ -52,25 +52,27 @@ export function Dessert({ palette, quality }: DishModelProps) {
       honey: new THREE.CircleGeometry(0.46, segments),
       cream: new THREE.SphereGeometry(0.26, full ? 24 : 12, full ? 18 : 9),
       crust: createFoodMaterial({
-        base: palette.base,
-        deep: "#3d2408",
+        base: "#8a5a25",
+        deep: "#2c1806",
         glow: palette.glow,
         noiseScale: 5,
-        char: 0.45,
+        char: 0.6,
         glaze: 0.3,
         roughness: 0.62,
         clearcoat: 0.2,
         cheap: !full,
       }).material,
+      // A Basque cheesecake's top is genuinely burnt — near-black at the centre,
+      // amber only where the surface cracked.
       burntTop: createFoodMaterial({
-        base: "#6b3a10",
-        deep: palette.deep,
-        glow: "#c9873a",
+        base: "#39200a",
+        deep: "#0d0703",
+        glow: "#a8641f",
         noiseScale: 6.5,
-        char: 0.9,
-        glaze: 0.18,
-        roughness: 0.5,
-        clearcoat: 0.3,
+        char: 0.95,
+        glaze: 0.14,
+        roughness: 0.55,
+        clearcoat: 0.25,
         cheap: !full,
       }).material,
       innerMaterial: createSimpleMaterial("#f0dcb0", 0.75, 0.1),
@@ -90,7 +92,7 @@ export function Dessert({ palette, quality }: DishModelProps) {
 
   return (
     <group>
-      <Plate quality={quality} radius={1.8} />
+      <Plate quality={quality} radius={1.62} />
 
       <group position={[-0.16, 0.36, 0]}>
         <mesh
@@ -106,8 +108,8 @@ export function Dessert({ palette, quality }: DishModelProps) {
         />
       </group>
 
-      {/* The cut slice, tipped away from the cake. */}
-      <group position={[1.12, 0.34, 0.42]} rotation={[0, -0.85, 0.06]}>
+      {/* The cut slice, pulled clear of the cake and turned away from it. */}
+      <group position={[1.22, 0.34, 0.66]} rotation={[0, -1.9, 0.05]}>
         <mesh
           geometry={assets.slice}
           material={assets.crust}

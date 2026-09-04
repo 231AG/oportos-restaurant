@@ -55,7 +55,7 @@ export function Hero() {
 
       {/* 3D / fallback stage — sits high and centre so the headline reads
           across its lower third rather than fighting it. */}
-      <div className="absolute inset-x-0 top-[4svh] bottom-[30svh] md:top-[2svh] md:bottom-[26svh]">
+      <div className="absolute inset-x-0 top-[9svh] bottom-[50svh] md:top-[2svh] md:bottom-[26svh]">
         <HeroVisual palette={hero.palette} progressRef={progressRef} />
         {/* Vignette: pulls the plate edge back into the dark and keeps the
             focus on the centre of the composition. */}
@@ -75,7 +75,7 @@ export function Hero() {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-[55svh] bg-gradient-to-t from-ink via-ink/80 to-transparent"
       />
 
-      <div className="shell relative z-10 mt-auto flex flex-col gap-8 pb-10 pt-[18svh] md:pb-14">
+      <div className="shell relative z-10 mt-auto flex flex-col gap-8 pb-10 pt-[6svh] md:pb-14 md:pt-[18svh]">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
           <h1 className="type-display text-[clamp(2.6rem,7.6vw,7.5rem)] text-cream">
             <RevealLines

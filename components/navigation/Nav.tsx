@@ -130,14 +130,20 @@ export function Nav() {
               </span>
             </button>
 
-            <OrderButton
-              message={generalOrderMessage()}
-              size="md"
-              className="hidden sm:inline-flex"
-              showMark={false}
-            >
-              Order now
-            </OrderButton>
+            {/* Wrapped rather than given `hidden sm:inline-flex` directly: the
+                button's own `inline-flex` and a `hidden` utility are the same
+                CSS property, and without tailwind-merge the winner is whichever
+                Tailwind emits last — which is how this shipped visible on a
+                390px viewport the first time. */}
+            <span className="hidden sm:contents">
+              <OrderButton
+                message={generalOrderMessage()}
+                size="md"
+                showMark={false}
+              >
+                Order now
+              </OrderButton>
+            </span>
 
             <button
               type="button"

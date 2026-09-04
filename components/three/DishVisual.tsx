@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { useGraphicsCapability } from "@/lib/hooks";
+import { useGraphicsCapability, useIsMobile } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 import { DishArt } from "./fallback/DishArt";
 import type { ModelKey, Palette } from "./types";
@@ -85,6 +85,7 @@ export function HeroVisual({
 }: BaseProps & { progressRef: RefObject<number>; onReady?: () => void }) {
   const capability = useGraphicsCapability();
   const reduced = useReducedMotion() ?? false;
+  const compact = useIsMobile();
   const webgl = capability === "full" || capability === "reduced";
 
   return (
@@ -100,6 +101,7 @@ export function HeroVisual({
         palette={palette}
         quality={capability === "full" ? "full" : "reduced"}
         reduced={reduced}
+        compact={compact}
         onReady={onReady}
       />
     </VisualShell>

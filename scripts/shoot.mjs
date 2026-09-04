@@ -32,24 +32,28 @@ async function settle(page, ms = 1200) {
   await wait(ms);
 }
 
-/** Scrolls in steps so scroll-linked animation runs, rather than teleporting. */
-async function scrollTo(page, target, steps = 24) {
-  await page.evaluate(
-    async ([target, steps]) => {
-      const start = window.scrollY;
-      const end =
-        typeof target === "number"
-          ? target
-          : (document.documentElement.scrollHeight - window.innerHeight) *
-            target;
-      for (let i = 1; i <= steps; i++) {
-        window.scrollTo(0, start + ((end - start) * i) / steps);
-        await new Promise((r) => requestAnimationFrame(() => r()));
-      }
-    },
-    [target, steps],
+/**
+ * Scrolls with real wheel events rather than `window.scrollTo`.
+ *
+ * Lenis owns the scroll position on non-touch devices and re-applies its own
+ * target every frame, so a programmatic `scrollTo` is silently undone — which
+ * is exactly why the first run of this script captured the hero seven times.
+ * Wheel events go through Lenis the same way a user's would.
+ */
+async function scrollTo(page, fraction) {
+  const target = await page.evaluate(
+    (f) => (document.documentElement.scrollHeight - window.innerHeight) * f,
+    fraction,
   );
-  await wait(700);
+
+  for (let i = 0; i < 90; i++) {
+    const current = await page.evaluate(() => window.scrollY);
+    const diff = target - current;
+    if (Math.abs(diff) < 40) break;
+    await page.mouse.wheel(0, Math.max(-900, Math.min(900, diff)));
+    await wait(90);
+  }
+  await wait(900);
 }
 
 async function shoot(page, name) {

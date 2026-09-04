@@ -5,10 +5,12 @@ resume from a cold start (see spec §0.2).
 
 ## Current status
 
-**Step:** 1 — Inspect & initialize (done) → 2 — Design tokens & brand system (in progress)
+**Step:** 1–8 done (hero, 3D, scroll storytelling, dishes, menu, WhatsApp, responsive)
+→ 9 (performance) and 10 (test + design review) remaining.
 
-**Next action:** Write design tokens in `app/globals.css`, root layout, and the shared
-brand primitives (Grain, Reveal, MagneticButton), then build the hero.
+**Next action:** Performance pass — audit bundle output, confirm the 3D is code-split and
+paused off-screen, check the reduced-quality path on mobile. Then the full design review
+against `/screenshots` and the §20 completion checklist.
 
 ## Environment findings (step 1)
 
@@ -53,15 +55,32 @@ Decision: **every visual in the site is generated in-repo.**
 ## Step log
 
 - [x] 1. Inspect repo, initialize Next.js + deps, confirm tooling/asset constraints.
-- [ ] 2. Design tokens & brand system.
-- [ ] 3. Hero.
-- [ ] 4. Core 3D interaction (+ screenshots).
-- [ ] 5. Scroll storytelling (+ screenshots at depths).
-- [ ] 6. Signature dishes & menu (+ screenshots).
-- [ ] 7. WhatsApp ordering.
-- [ ] 8. Responsive behaviour (+ mobile screenshots).
+- [x] 2. Design tokens & brand system (`app/globals.css`, three-tier motion scale).
+- [x] 3. Hero — masked line reveals, staged entrance, magnetic CTAs.
+- [x] 4. Core 3D interaction — camera rig, pointer damping, idle motion, dish swapping.
+- [x] 5. Scroll storytelling — hero camera move, sticky dish sequence, parallax layers.
+- [x] 6. Signature dishes, dish detail panel, full menu with category scroll-spy.
+- [x] 7. WhatsApp ordering — single number in config, per-dish/tray/booking messages.
+- [x] 8. Responsive — separate compact camera pose, mobile layout, touch behaviour.
 - [ ] 9. Performance.
 - [ ] 10. Test, design review, polish.
+
+## Notes from the 3D/visual iteration (steps 3–6)
+
+- **Dev server can't be used for visual checks here.** Next 16's Turbopack dev client
+  can't open its HMR websocket through this sandbox's proxy (`ERR_INVALID_HTTP_RESPONSE`)
+  and hydration never completes, so the page renders SSR-only with every entrance
+  animation frozen at its initial state. All verification runs against `next build` +
+  `next start` (`scripts/_cycle.sh` rebuilds, restarts and screenshots in one step).
+- **Lenis owns the scroll position**, so `window.scrollTo` in the capture script was
+  silently reverted every frame — the first "scroll depth" run captured the hero seven
+  times. `scripts/shoot.mjs` now scrolls with real wheel events.
+- **Tailwind without tailwind-merge**: `hidden sm:inline-flex` on a component whose base
+  class already sets `inline-flex` is a coin flip. The nav's "Order now" was visible on a
+  390px viewport because of it; conflicting display utilities now go on a wrapper.
+- Food shading went through four passes: flat orange plastic → char/speckle fbm +
+  stronger diffuse variation → matte ceramic plate (the glossy one read as a wooden
+  board) → a two-lobe chicken body (a single displaced sphere read as a loaf).
 
 ## Usage-limit interruptions
 
