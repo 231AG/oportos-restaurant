@@ -1,0 +1,256 @@
+@import "tailwindcss";
+
+/* Self-hosted so the build never needs network access. */
+@import "@fontsource/anton/400.css";
+@import "@fontsource/instrument-serif/400-italic.css";
+@import "@fontsource-variable/inter";
+
+/* ---------------------------------------------------------------------------
+   OPORTOS design tokens
+   A single dark, warm, food-lit environment. One accent (ember), one deep food
+   red (chilli), one paper tone (cream). No gradients-as-decoration, no shadow
+   stacks — depth comes from light, type scale and motion.
+--------------------------------------------------------------------------- */
+
+@theme {
+  /* — Surfaces: warm near-blacks, never neutral grey — */
+  --color-ink: #0a0806;
+  --color-ink-raised: #100c09;
+  --color-ink-panel: #17110d;
+  --color-ink-line: #241a14;
+
+  /* — Brand — */
+  --color-ember: #ff5b23;
+  --color-ember-soft: #ff8f52;
+  --color-ember-deep: #c23c10;
+  --color-chili: #9e1b10;
+  --color-coal: #2a1a12;
+
+  /* — Paper / text — */
+  --color-cream: #f4ece0;
+  --color-cream-dim: #b8ada0;
+  --color-ash: #7d7167;
+
+  /* — Semantic aliases (use these in components) — */
+  --color-background: var(--color-ink);
+  --color-surface: var(--color-ink-raised);
+  --color-foreground: var(--color-cream);
+  --color-muted: var(--color-cream-dim);
+  --color-subtle: var(--color-ash);
+  --color-accent: var(--color-ember);
+  --color-accent-soft: var(--color-ember-soft);
+  --color-accent-deep: var(--color-ember-deep);
+  --color-hot: var(--color-chili);
+  --color-line: --alpha(var(--color-cream) / 12%);
+  --color-line-strong: --alpha(var(--color-cream) / 26%);
+
+  /* — Type — */
+  --font-display: "Anton", "Arial Narrow", system-ui, sans-serif;
+  --font-editorial: "Instrument Serif", Georgia, serif;
+  --font-sans: "Inter Variable", "Inter", system-ui, -apple-system, sans-serif;
+
+  /* — Motion: three tiers, used consistently across the site — */
+  --duration-micro: 200ms; /* hover, press, focus       (150–250ms) */
+  --duration-ui: 520ms; /* panels, nav, transitions  (400–700ms) */
+  --duration-story: 1100ms; /* reveals, scene beats      (700–1500ms) */
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+
+  /* — Layout — */
+  --spacing-gutter: 1.5rem;
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-line);
+  }
+
+  html {
+    background-color: var(--color-ink);
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Lenis drives scrolling on capable devices; native smooth is the fallback
+     and is disabled entirely under reduced motion (see below). */
+  html:not(.lenis) {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-ink);
+    color: var(--color-cream);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: var(--color-ember);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ember);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@layer components {
+  /* Display type: tight, condensed, cinematic. Optical tracking tightens as
+     size grows, which is what keeps very large headlines from feeling loose. */
+  .type-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 0.84;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+
+  .type-editorial {
+    font-family: var(--font-editorial);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  /* Small all-caps label used for eyebrows, section numbers, nav. */
+  .type-label {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-ash);
+  }
+
+  .shell {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+    max-width: 96rem;
+  }
+
+  @media (min-width: 768px) {
+    .shell {
+      padding-inline: 2.5rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .shell {
+      padding-inline: 4rem;
+    }
+  }
+
+  /* Hairline rule used to structure sections instead of card borders. */
+  .rule {
+    height: 1px;
+    width: 100%;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--color-line-strong) 12%,
+      var(--color-line-strong) 88%,
+      transparent
+    );
+  }
+}
+
+@layer utilities {
+  /* Film grain — one SVG-generated tile, no image request. */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.055;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Warm light bloom behind the 3D scene and section headings. */
+  .ember-wash {
+    background: radial-gradient(
+      60% 60% at 50% 45%,
+      --alpha(var(--color-ember) / 18%) 0%,
+      --alpha(var(--color-chili) / 10%) 38%,
+      transparent 72%
+    );
+  }
+
+  .mask-fade-b {
+    mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  }
+
+  .mask-fade-x {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 6%,
+      black 94%,
+      transparent
+    );
+  }
+
+  .hyphen-none {
+    hyphens: none;
+  }
+}
+
+@keyframes scrollcue {
+  0% {
+    transform: translateY(-100%);
+  }
+  60%,
+  100% {
+    transform: translateY(320%);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion. Everything decorative stops; nothing structural moves.
+   Components additionally read `useReducedMotion()` so the 3D scene freezes
+   its idle motion and scroll rig rather than merely animating faster.
+--------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html:not(.lenis),
+  html.lenis {
+    scroll-behavior: auto;
+  }
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
